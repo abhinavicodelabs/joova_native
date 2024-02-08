@@ -1,11 +1,37 @@
 #import "AppDelegate.h"
+#import <React/RCTLinkingManager.h>
 
 #import <React/RCTBundleURLProvider.h>
 
+#import <AuthenticationServices/AuthenticationServices.h>
+#import <SafariServices/SafariServices.h>
+#import <FBSDKCoreKit/FBSDKCoreKit-swift.h>
+
 @implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application
+   openURL:(NSURL *)url
+   options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+  if ([RCTLinkingManager application:application openURL:url options:options]) {
+    return YES;
+  }
+
+  return NO;
+}
+
+- (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity
+ restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler
+{
+ return [RCTLinkingManager application:application
+                  continueUserActivity:userActivity
+                    restorationHandler:restorationHandler];
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+
+  [FIRApp configure];
   self.moduleName = @"joova";
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
@@ -15,11 +41,6 @@
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
-{
-  return [self getBundleURL];
-}
-
-- (NSURL *)getBundleURL
 {
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
