@@ -60,8 +60,9 @@
   <string>Joova wants to access your camera for uploading images.</string>
   <key>NSPhotoLibraryAddUsageDescription</key>
   <string>Joova wants to access your media for uploading images.</string>
-
-	<key>UIBackgroundModes</key>
+<key>NSAppleMusicUsageDescription</key>
+<string>Joova wants to use apple music.</string>
+<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 	</array>
