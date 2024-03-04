@@ -196,9 +196,7 @@ const SplashScreen = () => {
 
   const handleOnNavigationStateChange = async (navState: any) => {
     console.log('navState', navState);
-
     clearUserValues(navState);
-
     // Additional conditions or handling for other navigation states if needed
     if (
       navState.title === 'Log in | JOOVA' &&

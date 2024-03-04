@@ -56,6 +56,11 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location for...</string>
+	 <key>NSCameraUsageDescription</key>
+  <string>Joova wants to access your camera for uploading images.</string>
+  <key>NSPhotoLibraryAddUsageDescription</key>
+  <string>Joova wants to access your media for uploading images.</string>
+
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
