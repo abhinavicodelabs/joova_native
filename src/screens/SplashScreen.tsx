@@ -110,7 +110,7 @@ const SplashScreen = () => {
       console.log('notification', notification);
       const webUrl = notification?.web_url?.replace(
         'localhost:4000',
-        'learning.icodestaging.in',
+        'joova.app',
       );
       console.log('WEB UYRL ', webUrl);
 
@@ -200,7 +200,7 @@ const SplashScreen = () => {
     // Additional conditions or handling for other navigation states if needed
     if (
       navState.title === 'Log in | JOOVA' &&
-      navState.url !== 'https://learning.icodestaging.in/login'
+      navState.url !== 'https://joova.app/login'
     ) {
       const currentUserData: any = await webViewRef.current?.injectJavaScript(`
   JSON.stringify({ type: 'CURRENT_USER', payload: window.localStorage.getItem('currentUser') });
@@ -228,7 +228,7 @@ const SplashScreen = () => {
   const clearUserValues = async navState => {
     if (
       navState.title === 'Sell or rent lessons | JOOVA' &&
-      navState.url === 'https://learning.icodestaging.in/'
+      navState.url === 'https://joova.app/'
     ) {
       setLoginId('');
       setEmail(null);
@@ -298,7 +298,7 @@ const SplashScreen = () => {
             javaScriptEnabled={true}
             injectedJavaScriptBeforeContentLoaded={initScript}
             onMessage={handleOnMessage}
-            source={{uri: 'https://learning.icodestaging.in'}}
+            source={{uri: 'https://joova.app'}}
             onNavigationStateChange={handleOnNavigationStateChange}
             domStorageEnabled={true}
             originWhitelist={['*']}
