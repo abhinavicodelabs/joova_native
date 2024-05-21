@@ -5,7 +5,6 @@
   "scripts": {
     "android": "react-native run-android",
     "android-apk": "cd android && ./gradlew --stop && ./gradlew clean && ./gradlew app:assembleRelease",
-    "android-aab": "watchman watch-del-all && cd android && ./gradlew --stop && ./gradlew clean && ./gradlew app:bundleRelease",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",

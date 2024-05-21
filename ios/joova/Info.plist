@@ -20,6 +20,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -43,8 +45,6 @@
 			</array>
 		</dict>
 	</array>
-	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -54,15 +54,15 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Joova wants to use apple music.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Joova wants to access your camera for uploading images.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need your location for...</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Joova wants to access your media for uploading images.</string>
-	<key>UIBackgroundModes</key>
+	 <key>NSCameraUsageDescription</key>
+  <string>Joova wants to access your camera for uploading images.</string>
+  <key>NSPhotoLibraryAddUsageDescription</key>
+  <string>Joova wants to access your media for uploading images.</string>
+<key>NSAppleMusicUsageDescription</key>
+<string>Joova wants to use apple music.</string>
+<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 	</array>
@@ -75,12 +75,8 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
