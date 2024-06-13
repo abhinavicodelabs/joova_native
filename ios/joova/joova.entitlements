@@ -8,6 +8,7 @@
 	<array>
 		<string>applinks:joova.app</string>
 		<string>applinks:*.sendgrid.net</string>
+		<string>applinks:learning.icodestaging.in</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>

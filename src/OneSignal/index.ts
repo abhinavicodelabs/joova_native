@@ -1,5 +1,4 @@
-import { PushNotification } from "./OneSignalNotification";
-import { NotificationTemplates } from "./constant";
+import {PushNotification} from './OneSignalNotification';
+import {NotificationTemplates} from './constant';
 
-
-export  {PushNotification, NotificationTemplates};
+export {PushNotification, NotificationTemplates};
