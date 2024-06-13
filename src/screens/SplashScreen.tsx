@@ -163,6 +163,8 @@ const SplashScreen = () => {
   };
 
   const handleOnNavigationStateChange = async (navState: any) => {
+    webViewRef.current?.injectJavaScript(SAVE_FROM_WEB);
+
     if (prevUrl.current === `${baseUrl}/login`) {
       //Run this when user authenticates first time
       webViewRef.current?.injectJavaScript(`
