@@ -1,7 +1,16 @@
-import {ONESIGNAL_APP_ID, BASE_URL} from '@env';
+import {BASE_URL, ONESIGNAL_APP_ID} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useRef, useState} from 'react';
-import {ActivityIndicator, Linking, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  PermissionsAndroid,
+  Platform,
+  StyleSheet,
+  View,
+} from 'react-native';
+import RNFS from 'react-native-fs';
 import {OneSignal} from 'react-native-onesignal';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import WebView, {WebViewMessageEvent} from 'react-native-webview';
@@ -14,6 +23,7 @@ interface Message {
 
 enum MessageTypes {
   user = 'CURRENT_USER',
+  order_csv = 'CSV_ORDER_INBOXPAGE',
 }
 
 const baseUrl = BASE_URL;
@@ -54,6 +64,71 @@ const SplashScreen = () => {
       subscription.remove();
     };
   }, []);
+
+  const requestStoragePermission = async () => {
+    try {
+      // Check if the platform is Android
+      if (Platform.OS === 'android') {
+        // Check for the permissions
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        ]);
+
+        if (
+          granted['android.permission.READ_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED
+        ) {
+          console.log('You can read and write to the external storage');
+        } else {
+          console.log('Permission denied');
+          Alert.alert(
+            'Permission denied',
+            'You need to grant storage permissions to use this feature.',
+          );
+        }
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+  const convertArrayToCSV = array => {
+    return array.join(',');
+  };
+
+  const downloadFile = async url => {
+    try {
+      // Define the path where the file should be saved
+      const dest = `${RNFS.DocumentDirectoryPath}/${'abc'}`;
+      // Start downloading the file
+      const ret = RNFS.downloadFile({
+        fromUrl: url,
+        toFile: dest,
+        // Optionally you can add headers or begin, progress, and complete callbacks
+        headers: {
+          Accept: 'application/json',
+        },
+        begin: res => {
+          console.log('Download has begin');
+        },
+        progress: res => {
+          const progress = res.bytesWritten / res.contentLength;
+          console.log(`Progress: ${Math.round(progress * 100)}%`);
+        },
+      });
+      // Await the completion of the download
+      const result = await ret.promise;
+      if (result.statusCode == 200) {
+        console.log('File downloaded successfully to ' + dest);
+      } else {
+        console.log('Failed to download file', result);
+      }
+    } catch (err) {
+      console.log('Error downloading file:', err);
+    }
+  };
 
   useEffect(() => {
     const clickListener = (event: any) => {
@@ -197,6 +272,12 @@ const SplashScreen = () => {
           await AsyncStorage.removeItem('currentUser');
         }
 
+        break;
+      }
+      case MessageTypes.order_csv: {
+        const url = message?.payload;
+        downloadFile(url.replace('blob:', ''));
+        console.log('url', url.replace('blob:', ''));
         break;
       }
       default:
