@@ -10,11 +10,11 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import RNFS from 'react-native-fs';
 import {OneSignal} from 'react-native-onesignal';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import WebView, {WebViewMessageEvent} from 'react-native-webview';
 import {handlePermissionAndLogin} from './helper';
+import RNFetchBlob from 'rn-fetch-blob';
 
 interface Message {
   type: MessageTypes;
@@ -27,6 +27,7 @@ enum MessageTypes {
 }
 
 const baseUrl = BASE_URL;
+const deviceVersion = Platform.constants['Release'];
 
 const SplashScreen = () => {
   const [webViewLoaded, setWebViewLoaded] = useState(false);
@@ -74,7 +75,6 @@ const SplashScreen = () => {
           PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         ]);
-
         if (
           granted['android.permission.READ_EXTERNAL_STORAGE'] ===
             PermissionsAndroid.RESULTS.GRANTED &&
@@ -82,51 +82,48 @@ const SplashScreen = () => {
             PermissionsAndroid.RESULTS.GRANTED
         ) {
           console.log('You can read and write to the external storage');
+          return true;
         } else {
           console.log('Permission denied');
           Alert.alert(
             'Permission denied',
             'You need to grant storage permissions to use this feature.',
           );
+          return false;
         }
       }
     } catch (err) {
       console.warn(err);
+      return false;
     }
   };
-  const convertArrayToCSV = array => {
-    return array.join(',');
-  };
 
-  const downloadFile = async url => {
-    try {
-      // Define the path where the file should be saved
-      const dest = `${RNFS.DocumentDirectoryPath}/${'abc'}`;
-      // Start downloading the file
-      const ret = RNFS.downloadFile({
-        fromUrl: url,
-        toFile: dest,
-        // Optionally you can add headers or begin, progress, and complete callbacks
-        headers: {
-          Accept: 'application/json',
-        },
-        begin: res => {
-          console.log('Download has begin');
-        },
-        progress: res => {
-          const progress = res.bytesWritten / res.contentLength;
-          console.log(`Progress: ${Math.round(progress * 100)}%`);
-        },
-      });
-      // Await the completion of the download
-      const result = await ret.promise;
-      if (result.statusCode == 200) {
-        console.log('File downloaded successfully to ' + dest);
-      } else {
-        console.log('Failed to download file', result);
+  const downloadFile = async (CSV_URL: string) => {
+    if (deviceVersion <= 12 && Platform.OS === 'android') {
+      const permission = await requestStoragePermission();
+      if (!permission) {
+        return;
       }
-    } catch (err) {
-      console.log('Error downloading file:', err);
+    }
+    try {
+      const {config, fs} = RNFetchBlob;
+      const date = new Date();
+      const filePath = `${fs.dirs.DownloadDir}/file_${Math.floor(
+        date.getTime() + date.getSeconds() / 2,
+      )}.csv`;
+      // Start the download
+      const res = await config({
+        fileCache: true,
+        addAndroidDownloads: {
+          useDownloadManager: true,
+          notification: true,
+          path: filePath,
+          description: 'Downloading CSV file',
+        },
+      }).fetch('GET', CSV_URL);
+      console.log('The file saved to ', res.path());
+    } catch (error) {
+      console.error('Download error', error);
     }
   };
 
@@ -206,7 +203,6 @@ const SplashScreen = () => {
   };
 
   const handleDeepLinkUrl = url => {
-    console.log('Deep Link Initial URL: ', url);
     webViewRef.current?.injectJavaScript(`
       window.location.href = '${url}';
     `);
@@ -277,7 +273,6 @@ const SplashScreen = () => {
       case MessageTypes.order_csv: {
         const url = message?.payload;
         downloadFile(url.replace('blob:', ''));
-        console.log('url', url.replace('blob:', ''));
         break;
       }
       default:
