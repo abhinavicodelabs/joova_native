@@ -1,11 +1,20 @@
-import {ONESIGNAL_APP_ID, BASE_URL} from '@env';
+import {BASE_URL, ONESIGNAL_APP_ID} from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useRef, useState} from 'react';
-import {ActivityIndicator, Linking, StyleSheet, View} from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  PermissionsAndroid,
+  Platform,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {OneSignal} from 'react-native-onesignal';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import WebView, {WebViewMessageEvent} from 'react-native-webview';
 import {handlePermissionAndLogin} from './helper';
+import RNFetchBlob from 'rn-fetch-blob';
 
 interface Message {
   type: MessageTypes;
@@ -14,9 +23,11 @@ interface Message {
 
 enum MessageTypes {
   user = 'CURRENT_USER',
+  order_csv = 'CSV_ORDER_INBOXPAGE',
 }
 
 const baseUrl = BASE_URL;
+const deviceVersion = Platform.constants['Release'];
 
 const SplashScreen = () => {
   const [webViewLoaded, setWebViewLoaded] = useState(false);
@@ -54,6 +65,67 @@ const SplashScreen = () => {
       subscription.remove();
     };
   }, []);
+
+  const requestStoragePermission = async () => {
+    try {
+      // Check if the platform is Android
+      if (Platform.OS === 'android') {
+        // Check for the permissions
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        ]);
+        if (
+          granted['android.permission.READ_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.WRITE_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED
+        ) {
+          console.log('You can read and write to the external storage');
+          return true;
+        } else {
+          console.log('Permission denied');
+          Alert.alert(
+            'Permission denied',
+            'You need to grant storage permissions to use this feature.',
+          );
+          return false;
+        }
+      }
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  };
+
+  const downloadFile = async (CSV_URL: string) => {
+    if (deviceVersion <= 12 && Platform.OS === 'android') {
+      const permission = await requestStoragePermission();
+      if (!permission) {
+        return;
+      }
+    }
+    try {
+      const {config, fs} = RNFetchBlob;
+      const date = new Date();
+      const filePath = `${fs.dirs.DownloadDir}/file_${Math.floor(
+        date.getTime() + date.getSeconds() / 2,
+      )}.csv`;
+      // Start the download
+      const res = await config({
+        fileCache: true,
+        addAndroidDownloads: {
+          useDownloadManager: true,
+          notification: true,
+          path: filePath,
+          description: 'Downloading CSV file',
+        },
+      }).fetch('GET', CSV_URL);
+      console.log('The file saved to ', res.path());
+    } catch (error) {
+      console.error('Download error', error);
+    }
+  };
 
   useEffect(() => {
     const clickListener = (event: any) => {
@@ -131,7 +203,6 @@ const SplashScreen = () => {
   };
 
   const handleDeepLinkUrl = url => {
-    console.log('Deep Link Initial URL: ', url);
     webViewRef.current?.injectJavaScript(`
       window.location.href = '${url}';
     `);
@@ -197,6 +268,11 @@ const SplashScreen = () => {
           await AsyncStorage.removeItem('currentUser');
         }
 
+        break;
+      }
+      case MessageTypes.order_csv: {
+        const url = message?.payload;
+        downloadFile(url.replace('blob:', ''));
         break;
       }
       default:

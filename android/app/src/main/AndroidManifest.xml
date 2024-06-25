@@ -31,6 +31,7 @@
       <data android:scheme="https" />
       <data android:host="*.sendgrid.net"/>
       <data android:host="joova.app" />
+      <data android:host="www.joova.app" />
   </intent-filter>
       </activity>
     </application>
